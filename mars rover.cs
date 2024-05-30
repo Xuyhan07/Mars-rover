@@ -1,111 +1,292 @@
 using System;
-using System.Collections.Generic;
 
-namespace MarsRoverApp
-{
-    class MarsRover
-    {
-        private const int GridSize = 100;
-        private (int Row, int Column) Position = (1, 1);
-        private string Direction = "south";  // Initial direction
+enum InputCommand {
+	Forward = 'F',
+	Backward = 'B',
+	TurnRight = 'R',
+	TurnLeft = 'L'	
+}
 
-        public void TurnLeft()
-        {
-            Dictionary<string, string> leftTurns = new Dictionary<string, string>
-            {
-                { "north", "west" },
-                { "west", "south" },
-                { "south", "east" },
-                { "east", "north" }
-            };
-            Direction = leftTurns[Direction];
-        }
+enum Direction {
+	North = 'N',
+	East = 'E',
+	South = 'S',
+	West = 'W'
+}
 
-        public void TurnRight()
-        {
-            Dictionary<string, string> rightTurns = new Dictionary<string, string>
-            {
-                { "north", "east" },
-                { "east", "south" },
-                { "south", "west" },
-                { "west", "north" }
-            };
-            Direction = rightTurns[Direction];
-        }
 
-        public void MoveForward(int meters)
-        {
-            int newRow = Position.Row;
-            int newColumn = Position.Column;
+class MainClass {
+	
+	public static int positionX = 0;
+	public static int positionY = 0;
+	public static Direction direction = Direction.North;
 
-            switch (Direction)
-            {
-                case "north":
-                    newRow -= meters;
-                    break;
-                case "south":
-                    newRow += meters;
-                    break;
-                case "west":
-                    newColumn -= meters;
-                    break;
-                case "east":
-                    newColumn += meters;
-                    break;
-            }
+	
+	public static void Main (string[] args) {
+		printCurrentPosition(positionX, positionY, direction);
+		
+		while(true) {
+			Console.Write("Please input your command or enter to stop.: ");
+			string input = Console.ReadLine();
+			if(input == "") {
+				Console.WriteLine("App has stopped.");
+				break;
+			}
+			
+			// to pass current for patarn 2 app & 3
+			int x = positionX;
+			int y = positionY;
+			Direction d = direction;
 
-            // Check if new position is within boundaries
-            if (newRow >= 1 && newRow <= GridSize && newColumn >= 1 && newColumn <= GridSize)
-            {
-                Position = (newRow, newColumn);
-            }
-            else
-            {
-                Console.WriteLine("Movement halted: boundary exceeded");
-            }
-        }
+			// check each function pattarn
+			Console.WriteLine("makeMotion1: ");
+			makeMotion1(input);
+			Console.WriteLine("makeMotion2: ");
+			makeMotion2(input, x, y, d);
+			Console.WriteLine("makeMotion3: ");
+			makeMotion3(input, x, y, d);		
 
-        public void ExecuteCommands(List<string> commands)
-        {
-            foreach (var command in commands)
-            {
-                if (command.EndsWith("m"))
-                {
-                    int meters = int.Parse(command.TrimEnd('m'));
-                    MoveForward(meters);
-                }
-                else if (command.Equals("left", StringComparison.OrdinalIgnoreCase))
-                {
-                    TurnLeft();
-                }
-                else if (command.Equals("right", StringComparison.OrdinalIgnoreCase))
-                {
-                    TurnRight();
-                }
-            }
-            ReportPosition();
-        }
+			continue;
+		}
+	}
 
-        public void ReportPosition()
-        {
-            int squareNumber = (Position.Row - 1) * GridSize + Position.Column;
-            Console.WriteLine($"Position: {squareNumber}, Direction: {Direction}");
-        }
-    }
+	
+	static void printCurrentPosition(int positionX, int positionY, Direction direction) {
+		Console.WriteLine("Current position ( X position, Y position, Direction): ( {0}, {1}, {2} )", positionX, positionY, direction);
+	}
+	
+	static void makeMotion1(string input) {
+		foreach(char c in input) {			
+			switch((InputCommand)c){
+				case InputCommand.Forward:
+					moveForward();
+					break;
+				case InputCommand.Backward:
+					moveBackward();
+					break;
+				case InputCommand.TurnRight:
+					turnRight();
+					break;
+				case InputCommand.TurnLeft:
+					turnLeft();
+					break;
+				default:
+					Console.WriteLine("not correct input!");
+					break;
+			}
+		}		
+		printCurrentPosition(positionX, positionY, direction);
+	}
+	
+	static void moveForward() {		
+		switch(direction) {
+			case Direction.North:	
+				positionY++;
+				break;
+			case Direction.South:
+				positionY--;
+				break;
+			case Direction.East:
+				positionX++;
+				break;
+			case Direction.West:
+				positionX--;
+				break;
+			default:
+				break;
+		}
+	}
 
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            // Example set of commands
-            List<string> commands = new List<string> { "50m", "left", "23m", "left", "4m" };
+	static void moveBackward() {		
+		switch(direction) {
+			case Direction.North:
+				positionY--;
+				break;
+			case Direction.South:
+				positionY++;
+				break;
+			case Direction.East:
+				positionX--;
+				break;
+			case Direction.West:
+				positionX++;
+				break;
+			default:
+				break;
+		}
+	}
 
-            MarsRover rover = new MarsRover();
-            rover.ExecuteCommands(commands);
+	static void turnRight() {
+		switch(direction) {
+			case Direction.North:	
+				direction = Direction.East;
+				break;
+			case Direction.South:	
+				direction = Direction.West;
+				break;
+			case Direction.East:	
+				direction = Direction.South;
+				break;
+			case Direction.West:	
+				direction = Direction.North;
+				break;
+			default:
+				break;
+		}
+	}
 
-            // Further commands can be executed from the new position
-            List<string> nextCommands = new List<string> { "10m", "right", "30m" };
-            rover.ExecuteCommands(nextCommands);
-        }
-    }
+	static void turnLeft() {
+		switch(direction) {
+			case Direction.North:	
+				direction = Direction.West;
+				break;
+			case Direction.South:	
+				direction = Direction.East;
+				break;
+			case Direction.East:	
+				direction = Direction.North;
+				break;
+			case Direction.West:	
+				direction = Direction.South;
+				break;
+			default:
+				break;
+		}
+	}
+
+	/// <summary>
+	/// Move or change direction depends on current direction, and print out result.
+	/// This function is closed inside and using "switch" two times as conditional logic.
+	/// <param name="input">Input command</param name>
+	/// <param name="positionX">Current position of X</param name>
+	/// <param name="positionY">Current position of Y</param name>
+	/// <param name="direction">Current direction</param name>
+	/// </summary>
+	static void makeMotion2(string input, int positionX, int positionY, Direction direction) {
+		foreach(char c in input) {
+			switch(direction) {
+				case Direction.North:					
+					switch((InputCommand)c){
+						case InputCommand.Forward:
+							positionY++;
+							break;
+						case InputCommand.Backward:
+							positionY--;
+							break;
+						case InputCommand.TurnRight:
+							direction = Direction.East;
+							break;
+						case InputCommand.TurnLeft:
+							direction = Direction.West;
+							break;
+						default:
+							Console.WriteLine("not correct input!");
+							break;
+					}
+					break;
+					
+				case Direction.South:
+					switch((InputCommand)c){
+						case InputCommand.Forward:
+							positionY--;
+							break;
+						case InputCommand.Backward:
+							positionY++;
+							break;
+						case InputCommand.TurnRight:
+							direction = Direction.West;
+							break;
+						case InputCommand.TurnLeft:
+							direction = Direction.East;
+							break;
+						default:
+							Console.WriteLine("not correct input!");
+							break;
+					}
+					break;
+					
+				case Direction.East:
+					switch((InputCommand)c){
+						case InputCommand.Forward:
+							positionX++;
+							break;
+						case InputCommand.Backward:
+							positionX--;
+							break;
+						case InputCommand.TurnRight:
+							direction = Direction.South;
+							break;
+						case InputCommand.TurnLeft:
+							direction = Direction.North;
+							break;
+						default:
+							Console.WriteLine("not correct input!");
+							break;
+					}
+					break;
+					
+				case Direction.West:
+					switch((InputCommand)c){
+						case InputCommand.Forward:
+							positionX--;
+							break;
+						case InputCommand.Backward:
+							positionX++;
+							break;
+						case InputCommand.TurnRight:
+							direction = Direction.North;
+							break;
+						case InputCommand.TurnLeft:
+							direction = Direction.South;
+							break;
+						default:
+							Console.WriteLine("not correct input!");
+							break;
+					}
+					break;
+			}
+		}		
+		printCurrentPosition(positionX, positionY, direction);		
+	}
+
+	
+	static void makeMotion3(string input, int positionX, int positionY, Direction direction) {
+		foreach(char c in input) {
+			InputCommand request = (InputCommand)c; 
+			switch(direction) {
+				case Direction.North:
+					if(request == InputCommand.Forward) positionY++;
+					else if(request == InputCommand.Backward) positionY--;
+					else if(request == InputCommand.TurnRight) direction = Direction.East;
+					else if(request == InputCommand.TurnLeft) direction = Direction.West;
+					else Console.WriteLine("not correct input!");					
+					break;
+					
+				case Direction.South:
+					if(request == InputCommand.Forward) positionY--;
+					else if(request == InputCommand.Backward) positionY++;
+					else if(request == InputCommand.TurnRight) direction = Direction.West;
+					else if(request == InputCommand.TurnLeft) direction = Direction.East;
+					else Console.WriteLine("not correct input!");						
+					break;
+					
+				case Direction.East:
+					if(request == InputCommand.Forward) positionX++;
+					else if(request == InputCommand.Backward) positionX--;
+					else if(request == InputCommand.TurnRight) direction = Direction.South;
+					else if(request == InputCommand.TurnLeft) direction = Direction.North;
+					else Console.WriteLine("not correct input!");						
+					break;
+					
+				case Direction.West:
+					if(request == InputCommand.Forward) positionX--;
+					else if(request == InputCommand.Backward) positionX++;
+					else if(request == InputCommand.TurnRight) direction = Direction.North;
+					else if(request == InputCommand.TurnLeft) direction = Direction.South;
+					else Console.WriteLine("not correct input!");						
+					break;
+			}
+		}		
+		printCurrentPosition(positionX, positionY, direction);
+	}	
 }
